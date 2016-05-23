@@ -1,0 +1,15 @@
+{
+  "name": "Alamo-nofitifer",
+  "version": "0.0.1",
+  "description": "An application to notify users of movies they might be interested in that are playing at their local Alamo Draft house",
+  "main": "server.js",
+  "repository": "",
+  "author": "Andrew Kelley <kelleyaj@me.com>",
+  "dependencies": {
+    "express": "~3.2.4",
+    "node-movie": "^2.0.0",
+  },
+  "devDependencies": {
+    "jasmine": "^2.4.1"
+  }
+}
