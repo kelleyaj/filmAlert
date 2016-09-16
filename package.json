@@ -7,7 +7,7 @@
   "author": "Andrew Kelley <kelleyaj@me.com>",
   "dependencies": {
     "express": "~3.2.4",
-    "node-movie": "^2.0.0",
+    "node-movie": "^2.0.0"
   },
   "devDependencies": {
     "jasmine": "^2.4.1"
