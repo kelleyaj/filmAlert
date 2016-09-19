@@ -6,6 +6,7 @@
   "repository": "",
   "author": "Andrew Kelley <kelleyaj@me.com>",
   "dependencies": {
+    "async": "^2.0.1",
     "express": "~3.2.4",
     "node-movie": "^2.0.0"
   },

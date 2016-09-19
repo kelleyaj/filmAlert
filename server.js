@@ -4,7 +4,6 @@ var movieFetcherService = require("./services/movieFetchService"),
     tastePorfile = require('./services/tasteProfiler');
     
 
-var testList = movieFetcherService.getMovies();
-
-//console.log(JSON.stringify(testList));
-
+movieFetcherService.getMovies(function(err,data){
+    console.log("data in server.js: " + JSON.stringify(data));
+});

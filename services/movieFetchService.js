@@ -4,25 +4,28 @@ var commonUtil = require("../util/commonUtilities"),
     http = require('http'),
     movie = require('node-movie');
     
+var async = require('async');
+    
 var myAlamoTheaterId = '0501';
 
-module.exports.getMovies = function(){
-    this.alamoMovieCalendar = getAlamoMovieCalendar(myAlamoTheaterId, function(fetchedCalendar){
-        //console.log(alamoMovieCalendar);
-        this.movieNameList = getListOfMovieNames(fetchedCalendar);
-    });
-    //this.movieNameList = getListOfMovieNames(this.alamoMovieCalendar);
-    //this.IMDBList = getListOfIMDBInfo(this.movieNameList);
+module.exports.getMovies = function(callback) {
+    var movieNameList = [];
     
-    return this.movieNameList;
+    async.waterfall([
+        getAlamoMovieCalendar,
+        getListOfMovieNames,
+        getListOfIMDBInfo,
+        ],function (err, result) {
+            callback(null,result);
+        });
 };
 
-function getAlamoMovieCalendar(alamoTheaterId, callBack){
+function getAlamoMovieCalendar(callback){
     //call alamo service to get calendar of the month for location x
     var options = {
       host: 'feeds.drafthouse.com',
       port: 80,
-      path: '/adcService/showtimes.svc/calendar/' + alamoTheaterId + '/',
+      path: '/adcService/showtimes.svc/calendar/' + '0501' + '/',
     };
 
     http.get(options, function(resp){
@@ -33,7 +36,8 @@ function getAlamoMovieCalendar(alamoTheaterId, callBack){
         });
         
         resp.on('end', function () {
-            callBack(JSON.parse(alamoFeedResponse));
+            var parsedResponse = JSON.parse(alamoFeedResponse);
+            callback(null,parsedResponse.Calendar);
       });
       
     }).on("error", function(e){
@@ -42,29 +46,37 @@ function getAlamoMovieCalendar(alamoTheaterId, callBack){
 }
  
 //Return an array of movie names from an alamoMovieCalendar object
-function getListOfMovieNames(alamoMovieCalendar){
+function getListOfMovieNames(alamoMovieCalendar,callback){
     var filmNameList = [];
-     alamoMovieCalendar.Cinemas[0].Months[0].Weeks[0].Days.forEach(function(day){
-          if(day.Films){
-            day.Films.forEach(function(film){
-              //console.log(film.FilmName);
-              filmNameList.push(commonUtil.cleanFilmName(film.FilmName));
-            });
-          }
-     });
-    return filmNameList;
+    alamoMovieCalendar.Cinemas[0].Months[0].Weeks[0].Days.forEach(function(day){
+       if(day.Films){
+         day.Films.forEach(function(film){
+           filmNameList.push(commonUtil.cleanFilmName(film.FilmName));
+         });
+       }
+      });
+    callback(null,filmNameList);
 }
 
-
 //For an array of movie names get imdb info for each, return array with results.
-function getListOfIMDBInfo(filmNames){
+function getListOfIMDBInfo(filmNames, callback){
+    console.log("in getListOfIMDBInfo ");
     var fullMovieInfoList = [];
-    filmNames.forEach(function(filmName){
+    async.each(filmNames, function(filmName,callback){
+        //console.log("Processing film: " + filmName);
         movie(filmName, function (err, data) {
-            if(data){
+            if(data.Response == "True"){
                 fullMovieInfoList.push(data);
+            } else{
+                console.log("Error for " + filmName);
+                console.log(data.Error);
             }
-        });   
+            callback(null);
+        });
+    }, function(err){
+        if(err){
+            console.log("An error calling IMDB.");
+        }
+        callback(null,fullMovieInfoList);
     })
-    return fullMovieInfoList;
 };
