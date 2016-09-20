@@ -5,5 +5,9 @@ var movieFetcherService = require("./services/movieFetchService"),
     
 
 movieFetcherService.getMovies(function(err,data){
-    console.log("data in server.js: " + JSON.stringify(data));
+    if(err){
+        console.log(err);
+    } else {
+        console.log("data in server.js: " + JSON.stringify(data));
+    }
 });
